@@ -76,10 +76,13 @@ To learn about the purpose, available options, and accepted formats for configur
 ## Installation
 
 1. Run Homepage and identify the host directory mounted as the container's configuration directory.
-2. Copy the YAML files, `custom.css`, and `custom.js` into that directory.
-3. Configure the environment variables used by the files, as described in the [Environment variables](#environment-variables) section.
-4. Configure access to the Nginx Proxy Manager API and generate a token, as described in the [Nginx Proxy Manager integration](#nginx-proxy-manager-integration) section.
-5. Restart Homepage or wait for the configurations to load, then check the dashboard.
+2. Donwload this repo source code, or git clone it to your Homepage's host server.
+3. Copy this repo source code YAML files, `custom.css`, and `custom.js` into that directory.
+    1. Depending what you want to achieve, not all files would need to be copied.
+    2. For example, to preview host in a ordered list, you don't need to copy `custom.css`, neither `custom.js`.
+4. Configure the environment variables used by the files, as described in the [Environment variables](#environment-variables) section.
+5. Configure access to the Nginx Proxy Manager API and generate a token, as described in the [Nginx Proxy Manager integration](#nginx-proxy-manager-integration) section.
+6. Restart Homepage or wait for the configurations to load, then check the dashboard.
 
 The Docker connection uses `/var/run/docker.sock`. Therefore, for the container widgets to work, this socket must be available to Homepage in the environment where it runs.
 
