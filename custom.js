@@ -1,15 +1,24 @@
-const icon_scraper_api = `https://geticon.dev/?url=` //Set a custom icon_scraper api to fetch your host icons
+// Enable/Disable any personalization by those variable keys
+const configurations = {
+  load_customizations: true,    // Completely disables all personalizations {true / false}
+  
+  nginx_section_id: "services", // Target section to apply customizations (need match the id: tag on YAML) {string}
+  subdomains_as_name: true,     // Enable using the subdomain of your domain url as a item name {true / false}
+  domain_name_filter: [         // Fill this list with your domains to help setting subdomain as name {Array[string]}
+    "example.com",
+    "internal.example.net",
+  ],
 
-//This is used to polish your proxy hosts view, it uses the subdomain inside your proxy url as the item name
-const domain_name_filter = [
-  "example.com",
-  "internal.example.net",
-]
+  fetch_domain_icons: true,     // Enables icon scraping using the api url set bellow {true / false}
+  icon_scraper_api: "https://geticon.dev/?url=", // Icon scraper API url {url}
+  
+  larger_nginx_section: true,   // It sets the nginx_section_id element to be slightly larger then the rest {true / false}
+  proxy_host_layout: "grid",    // It sets the nginx_section_id proxy host list layout between {list, grid, compact-list}
+  icon_size: "50px",            // It sets the domain icon size for `list` and `compact-list` layouts {css supported size (px, em, in...)}
+}
 
-// id of the section where your proxy hosts are fetched and listed
-const services_api_list_id = '#services'
-const TEMPO_ESPERA_MS = 100; // Debounce time to wait for changes on the list
-const monitor = { observador: null, // Main monitor function, watching for changes on body
+const debounce_timeout = 100; // Debounce time to wait for changes on the list
+const monitor = {  // Main monitor function, watching for changes on body
   /* This function watches constantly the changes on body and at each change
     it ckecks if the nginx section still exists. If nginx section exists, a
     new observer is set on the element.
@@ -21,12 +30,12 @@ const monitor = { observador: null, // Main monitor function, watching for chang
     necessary to monitor the entire body for changes and made it restart the
     observer if it gets lost.
   */
-  
+  observador: null,
   iniciar() {
     if (!this.observador) {
       this.observador = new MutationObserver((mutations) => {
         // Verifica se o elemento existe na tela atual
-        const elementoAtual = document.querySelector(services_api_list_id);
+        const elementoAtual = document.querySelector("#" + configurations.nginx_section_id);
         if (!elementoAtual) return;
 
         const mudouAlgoNoAlvo = mutations.some((m) => 
@@ -63,7 +72,7 @@ const callback = () => {
     window.phc_cooldown = setTimeout(() => {
         monitor.pausar()
         processarMudancaFinal()
-    }, TEMPO_ESPERA_MS);
+    }, debounce_timeout);
 };
 
 /* This function starts the changing process, it sets wich items are going to be changend
@@ -72,8 +81,9 @@ and waits for all items to load if the list was not fully loaded yet.
 */
 async function processarMudancaFinal() { console.log("Atualizando lista de proxies")
     // Código pra ser executado toda vez que os proxy hosts forem atualzados
-    const proxies_item = document.querySelector("#services > div > div:nth-child(3) > div")
-    var   proxies_list = proxies_item.children
+    const nginx_section = document.getElementById(configurations.nginx_section_id)
+    const proxies_item  = nginx_section.querySelector("#services > div > div:nth-child(3) > div")
+    var   proxies_list  = proxies_item.children
     
     while (proxies_list.length <= 1) {
       await new Promise(r => setTimeout(r, 250)); //Sleep for 250ms waiting the api to properly load
@@ -81,9 +91,14 @@ async function processarMudancaFinal() { console.log("Atualizando lista de proxi
     }
 
     process_proxy_block(proxies_list)
-    
-    // Adding a custom css to structure all of the items
-    // proxies_item.classList.add("test-proxy-hosts-list")    
+
+    if (configurations.larger_nginx_section) nginx_section.classList.add("nginx-section")
+
+    if (!["grid", "compact-list"].includes(configurations.proxy_host_layout)) return
+
+    proxies_item.classList.add("proxy-hosts-grid-list")
+    configurations.proxy_host_layout === "compact-list" && proxies_item.style
+      .setProperty("grid-template-columns", "repeat(auto-fill, minmax(150px, 1fr))")
 }
 
 /* This is the final function, it start looping through all items inside the proxies list
@@ -92,10 +107,11 @@ and alters the "name" field, filtering your domain out of it. For exemmple:
       A proxy entry with:                 "subdomain.example-domain.com"
       With a domain_name_filter set to:   "example-domain.com"
       Will return the following name:     "subdomain"
+(if no domain list is set, this script will split the domain by "." and use the first match)
 
   And the final part of this function uses a custom API to fetch icons for your proxy hosts
 by default, I suggest the "https://geticon.dev" API, the API was able to fetch a good amount
-of icons for mys proxy domains and it sets a placeholder icon displaying the fist letter of
+of icons for my proxy domains and it sets a placeholder icon displaying the fist letter of
 the urls it couldn't find. And when the API fails to fetch anything, a placeholder icon is set.
 The icon was extracted from "https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/server-network.svg".
 */
@@ -105,23 +121,43 @@ async function process_proxy_block(div_node) {
 
   for (let item of div_node) {
     const name_it = item.querySelector("[data-custom_name_shift=true]") || item.firstChild, nametxt = name_it.innerHTML
+    const icon_lk = configurations.icon_scraper_api !== "" ? configurations.icon_scraper_api + item.href : null
     const item_ic = item.querySelector("[data-custom_img_loaded=true]") || document.createElement("img")
+    
+    // Adding a custom css to structure all of the items
+    switch (configurations.proxy_host_layout) {
+      case "grid":
+        item.classList.add("proxy-hosts-grid-item")
+      break
+      
+      default:
+        item_ic.style.width = configurations.icon_size
+      break
+    }
 
     name_it.dataset.custom_name_shift = true
     item_ic.dataset.custom_img_loaded = true
-    item_ic.setAttribute("src", icon_scraper_api + item.href)
+    item_ic.setAttribute("src", icon_lk)
     item_ic.setAttribute("onerror", `this.setAttribute("src", "${not_found}")`)
-    
-    const new_nametxt = nametxt.charAt(0).toUpperCase() + nametxt.slice(1)
-      .replace(domain_name_filter.find(domain => nametxt.includes(domain)), "")
-      .replaceAll(".", "")
 
-    name_it.innerHTML = new_nametxt.length < 11 ?
-      new_nametxt : new_nametxt.slice(0, 11) + "..."
+    if (configurations.subdomains_as_name) { let new_nametxt
+      const captalize_first_letter = nametxt.charAt(0).toUpperCase() + nametxt.slice(1)
 
-    item.insertBefore(item_ic, item.firstChild)
+      if (configurations.domain_name_filter.length > 0){
+        new_nametxt = captalize_first_letter
+          .replace(configurations.domain_name_filter.find(domain => nametxt.includes(domain)), "")
+          .replaceAll(".", "")
+      } else new_nametxt = captalize_first_letter.split(".")[0]
+      
+      if (["grid", "compact-list"].includes(configurations.proxy_host_layout)) {
+        name_it.innerHTML = new_nametxt.length < 11 ?
+          new_nametxt : new_nametxt.slice(0, 11) + "..."
+      }
+    }
+
+    configurations.fetch_domain_icons && item.insertBefore(item_ic, item.firstChild)
   } monitor.iniciar()
 }
 
 // Starts the document.body monitor
-monitor.iniciar()
+configurations.load_customizations && monitor.iniciar()

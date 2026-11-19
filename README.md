@@ -10,14 +10,7 @@ In addition to organizing services, the project includes a customization of the 
 
 ## Screenshots
 
-Add images of the dashboard in operation here. One suggestion is to create the `docs/images/` folder in the repository and save the screenshots there.
-
-### Dashboard overview "Native" (Option without custom.css and custom.js)
-This is a version that uses only the YAML configuration files, also known as the "native version". It is a simple version intended to present my configurations without creating conflicts with future updates to the [Homepage](https://gethomepage.dev/) project.
-
-![Dashboard overview](docs/images/homepage-proxy-hosts-vertical-list.png)
-
-### Dashboard overview (Customization option using custom.css and custom.js)
+### Dashboard overview "Grid" (Customization option using custom.css and custom.js)
 This is my idea of how a dashboard should work, presenting an interface very similar to those offered by the [CasaOS](https://casaos.zimaspace.com/) and [ZimaOS](https://www.zimaspace.com/) projects, while adding a grid-style list to display all the services I host using [Nginx Proxy Manager](https://nginxproxymanager.com/).
 
 ![Nginx Proxy Manager Proxy Hosts in a grid](docs/images/homepage-proxy-hosts-grid-list-with-icons.png)
@@ -25,7 +18,9 @@ This is my idea of how a dashboard should work, presenting an interface very sim
 ### Widgets and server information
 I chose to display two sections on the sides, listing all the services I use, their statistics, and the network devices in my infrastructure.
 
-![Widgets and server information](docs/images/homepage-services-widgets.png)
+| Multimedia section | Network section |
+|---|---|
+| ![Widgets and server information](docs/images/homepage-services-widgets-1.png) | ![Widgets and server information](docs/images/homepage-services-widgets-2.png) |
 
 ### News feed using RSS
 I separated the infrastructure dashboard and my news feed into tabs. In the news feed, I added Brazilian tech news websites.
@@ -147,30 +142,134 @@ The API integration provides the list items. The grid layout and icons are imple
 
 The script:
 
-1. Observes document changes using `MutationObserver` and monitors the area identified by `#services`.
-2. Waits for the Proxy Hosts list to load and applies the changes after a short period with no new changes.
-3. Simplifies the name displayed for each host by removing the suffixes configured in `domain_name_filter` and the dots in the text.
-4. When the name has 11 characters or more, keeps the first 11 and adds `...`.
-5. Requests an icon for each address using the service configured in `icon_scraper_api`.
+1. Observes document changes using `MutationObserver` and monitors the section defined in `nginx_section_id`.
+2. Waits for the Proxy Hosts list to load and applies the changes after a short period with no new changes (`debounce_timeout`, defined in the script itself).
+3. Can simplify the name displayed for each host by using the subdomain and removing the suffixes configured in `domain_name_filter`.
+4. In the `grid` and `compact-list` layouts, when the name has 11 characters or more, keeps the first 11 and adds `...`.
+5. When enabled, requests an icon for each address using the service configured in `icon_scraper_api`.
 6. Uses a fallback SVG icon when the image cannot be loaded.
+7. Can increase the width of the Proxy Hosts section and organize the items in the `list`, `grid`, or `compact-list` layouts.
 
-The default address configured for retrieving icons is `https://geticon.dev/?url=`. This address can be changed in the `icon_scraper_api` variable to use another compatible service.
+#### Configuration options
 
-The `domain_name_filter` list contains the domain suffixes that the script removes from displayed names. Edit this list to match the domains used in your installation. For example:
+The options are located in the `configurations` object at the beginning of the `custom.js` file:
 
+| Option | Purpose |
+|---|---|
+| `load_customizations` | Enables or disables all script customizations. |
+| `nginx_section_id` | ID of the Homepage section that will receive the customizations. Must match the ID configured in the YAML. |
+| `subdomains_as_name` | Uses the subdomain as the Proxy Host name in the `grid` and `compact-list` layouts. |
+| `domain_name_filter` | List of domain suffixes removed when building the name. If the list is empty, the script considers only the part before the first dot. |
+| `fetch_domain_icons` | Enables or disables the inclusion of domain icons. |
+| `icon_scraper_api` | Base address of the service used to fetch icons. |
+| `larger_nginx_section` | Applies a CSS class to make the Proxy Hosts section larger than the others. |
+| `proxy_host_layout` | Defines how items are displayed: `list`, `grid`, or `compact-list`. |
+| `icon_size` | Defines the size of icons in the `list` and `compact-list` layouts. Accepts CSS units such as `px` and `em`. |
+
+### Grid Layout Exemple
+![Grid Layout Exemple](docs/images/grid-list-layout-example.png)
+
+#### Code:
 ```javascript
-const domain_name_filter = [
-  "example.com",
-  "internal.example.net",
-]
+const configurations = {
+    load_customizations: true,
+    
+    nginx_section_id: "services",
+    subdomains_as_name: true,
+    domain_name_filter: [        
+        "example.com",
+        "internal.example.net",
+    ],
+
+    fetch_domain_icons: true,
+    icon_scraper_api: "https://geticon.dev/?url=",
+    
+    larger_nginx_section: true,
+    proxy_host_layout: "grid",
+    icon_size: "30px",
+}
 ```
+
+### Compact List Layout Exemple
+![Compact List Layout Exemple](docs/images/compact-list-layout-example.png)
+
+#### Code:
+```javascript
+const configurations = {
+    load_customizations: true,
+    
+    nginx_section_id: "services",
+    subdomains_as_name: true,
+    domain_name_filter: [        
+        "example.com",
+        "internal.example.net",
+    ],
+
+    fetch_domain_icons: true,
+    icon_scraper_api: "https://geticon.dev/?url=",
+    
+    larger_nginx_section: true,
+    proxy_host_layout: "compact-list",
+    icon_size: "50px",
+}
+```
+
+### List Layout Exemple
+![Vertical List Layout Exemple](docs/images/vertical-list-layout-example.png)
+
+#### Code:
+```javascript
+const configurations = {
+    load_customizations: true,
+    
+    nginx_section_id: "services",
+    subdomains_as_name: false,
+    domain_name_filter: [        
+        "example.com",
+        "internal.example.net",
+    ],
+
+    fetch_domain_icons: true,
+    icon_scraper_api: "https://geticon.dev/?url=",
+    
+    larger_nginx_section: true,
+    proxy_host_layout: "list",
+    icon_size: "30px",
+}
+```
+
+### List without icons nither sudomain to name convertion Layout Exemple
+![Vertical List Layout Exemple](docs/images/vertical-list-layout-example-no-icons.png)
+
+#### Code:
+```javascript
+const configurations = {
+    load_customizations: true,
+    
+    nginx_section_id: "services",
+    subdomains_as_name: false,
+    domain_name_filter: [        
+        "example.com",
+        "internal.example.net",
+    ],
+
+    fetch_domain_icons: false,
+    icon_scraper_api: "https://geticon.dev/?url=",
+    
+    larger_nginx_section: true,
+    proxy_host_layout: "list",
+    icon_size: "30px",
+}
+```
+
+The default address configured for retrieving icons is `https://geticon.dev`. This address can be changed in `icon_scraper_api` to use another compatible service. To disable icon loading, set `fetch_domain_icons: false`.
 
 ### CSS (`custom.css`)
 
 The CSS:
 
 - Adjusts the minimum width of the `#services` section at different screen widths.
-- Turns the Proxy Hosts list into a responsive grid with columns at least 100 px wide.
+- In grid layouts, turns the Proxy Hosts list into a responsive grid with columns at least 100 px wide.
 - Arranges each item vertically to accommodate the icon and host name.
 - Adjusts image sizes and item spacing.
 
