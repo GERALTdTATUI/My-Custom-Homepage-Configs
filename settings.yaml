@@ -1,0 +1,43 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/configs/settings/
+
+headerStyle: boxed
+
+quicklaunch:
+  searchDescriptions: true
+  hideInternetSearch: true
+  showSearchSuggestions: true
+  hideVisitURL: true
+  provider: brave
+
+layout:
+  Md:
+    header: false
+    tab: Dash
+  Proxies:
+    header: false
+    tab: Dash
+  NetworkGroup:
+    header: false
+    tab: Dash
+    Network:
+      OPNsense:
+        header: false
+        style: row
+        columns: 2
+      NetServices:
+        header: false
+    Infra Hardware:
+      useEqualHeights: true
+      style: row
+      columns: 2
+  News&feed:
+    tab: News
+    header: false
+  Developer:
+    tab: Bookmarks
+  Social:
+    tab: Bookmarks
+  Entertainment:
+    tab: Bookmarks

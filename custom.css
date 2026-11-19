@@ -1,0 +1,52 @@
+/* Setting custom size to the proxy host section */
+@media screen and (min-width: 1280px) {
+    /* Tamanho regular 397.333 */
+    #services {
+        min-width: 450.666px !important;
+    }
+}
+
+@media screen and (min-width: 1536px) {
+    /* Tamanho regular 482.667 */
+    #services {
+        min-width: 621.32445px !important;
+    }
+}
+
+@media screen and (min-width: 1792px) {
+    /* Tamanho regular 568 */
+    #services {
+        min-width: 792px !important;
+    }
+}
+
+/* Applying a grid layout to the proxy hosts list */
+#services > div > div:nth-child(3) > div, .proxy-hosts-list {
+    /* display: flex;
+    flex-direction: row;
+    flex-wrap: wrap; */
+    display: grid;
+    /* Cria colunas rigorosamente iguais de no mínimo 250px */
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+}
+
+/* Ajusting proxy host items to fit thier site favicon */
+#services > div > div:nth-child(3) > div > a, .proxy-hosts-list-item {
+    display: grid;
+    grid-template-columns: 100%;
+    grid-template-rows: repeat(auto-fill, minmax(100px, 1fr));
+    text-wrap-mode: nowrap;
+    overflow-x: hidden;
+    padding: 0;
+    padding-bottom: 5px;
+    gap: 5px;
+
+    * {
+        margin: auto;
+        padding: 0;
+    }
+
+    img {
+        width: 80%;
+    }
+}

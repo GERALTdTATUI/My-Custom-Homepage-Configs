@@ -1,0 +1,220 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/configs/services/
+
+- News&feed:
+      # id: news_feed
+    - Adrenaline:
+        widget:
+            type: feed
+            url: https://adrenaline.com.br/rss
+            maxItems: 12 # optional - defaults to 5
+            layout: grid # optional - possible values list, grid - defaults to list
+            images: true # optional - set to false to hide images - defaults to true
+    - Diolinux News:
+        widget:
+            type: feed
+            url: https://plus.diolinux.com.br/c/noticias-tecnologia/20.rss
+            maxItems: 20 # optional - defaults to 5
+            images: false
+    - Diolinux:
+        widget:
+            type: feed
+            url: https://diolinux.com.br/feed
+            maxItems: 30 # optional - defaults to 5
+            images: false # optional - set to false to hide images - defaults to true
+
+            
+- Md:
+    - Multimedia:
+        - Jellyfin:
+            id: Jellyfin
+            icon: jellyfin.png
+            href: https://jelly.{{HOMEPAGE_VAR_DOMAIN}}
+            description: Jellyfin Media Server.
+            container: jellyfin
+            widget:
+                type: jellyfin
+                url: https://jelly.{{HOMEPAGE_VAR_DOMAIN}}
+                key: {{HOMEPAGE_VAR_JELLYFIN_KEY}}
+                fields: ["songs", "movies", "series", "episodes"]
+                version: 2 # optional, default is 1
+                enableBlocks: true # optional, defaults to false
+                enableNowPlaying: true # optional, defaults to true
+                enableUser: true # optional, defaults to false
+                enableMediaControl: false # optional, defaults to true
+                showEpisodeNumber: true # optional, defaults to false
+                expandOneStreamToTwoRows: false # optional, defaults to true
+
+        - Nextcloud:
+            id: Nextcloud
+            icon: nextcloud.png
+            href: https://nextcloud.{{HOMEPAGE_VAR_DOMAIN}}
+            description: Nextcloud file cloud service.
+            container: immich-server
+            widget:
+                type: nextcloud
+                url: https://nextcloud.{{HOMEPAGE_VAR_DOMAIN}}
+                key: {{HOMEPAGE_VAR_NEXTCLOUD_KEY}}
+                fields: ["freespace", "numfiles", "numshares"]
+
+        - Immich:
+            id: Immich
+            icon: immich.png
+            href: https://immich.{{HOMEPAGE_VAR_DOMAIN}}
+            description: Immich photo library.
+            container: immich-server
+            widget:
+                type: immich
+                url: https://immich.{{HOMEPAGE_VAR_DOMAIN}}
+                key: {{HOMEPAGE_VAR_IMMICH_KEY}}
+                version: 2 # optional, default is 1
+                fields: ["photos", "videos", "storage"]
+
+        - Romm:
+            id: Romm
+            icon: romm.png
+            href: https://romm.{{HOMEPAGE_VAR_DOMAIN}}
+            description: Rom Manager.
+            container: big-bear-romm
+            widget:
+                type: romm
+                url: https://romm.{{HOMEPAGE_VAR_DOMAIN}}
+                fields: ["platforms", "totalRoms", "saves", "states"] # optional - default fields shown
+
+        - Karakeep:
+            id: Karakeep
+            icon: karakeep.png
+            href: https://kara.{{HOMEPAGE_VAR_DOMAIN}}
+            description: Karakeep bookmarks manager.
+            container: karakeep
+            widget:
+                type: karakeep
+                url: https://kara.{{HOMEPAGE_VAR_DOMAIN}}
+                key: {{HOMEPAGE_VAR_KARAKEEP_KEY}}
+                fields: ["bookmarks", "favorites"]
+
+    - Game Servers:
+        - Minecraft:
+            id: Minecraft
+            icon: minecraft.png
+            href: https://crafty.{{HOMEPAGE_VAR_DOMAIN}}
+            description: minecraft personal server.
+            container: crafty-container
+            widget:
+                type: minecraft
+                url: udp://{{HOMEPAGE_VAR_DOMAIN}}:25565
+
+
+- Proxies:
+    - Services:
+        - NPM:
+            id: services
+            icon: nginx-proxy-manager.png
+            href: https://nginx.{{HOMEPAGE_VAR_DOMAIN}}
+            description: Nginx Proxy Manager
+            container: nginxproxymanager
+            widgets:
+              - type: npm
+                url: http://nginxproxymanager:81
+                username: {{HOMEPAGE_VAR_NGINX_USER}}
+                password: {{HOMEPAGE_VAR_NGINX_PASS}}
+              - type: customapi
+                url: http://{{HOMEPAGE_VAR_SERVER_IP}}:81/api/nginx/proxy-hosts
+                headers: 
+                    Authorization: Bearer {{HOMEPAGE_VAR_NGINX_TOKEN}}
+                refreshInterval: 1000
+                display: dynamic-list
+                mappings:
+                    name: domain_names.0
+                    label: " "
+                    format: text
+                    # remap:
+                    #   - value: "*.test"
+                    #     to: banan
+                    target: http://{domain_names.0}
+
+
+- NetworkGroup:
+    - Network:
+        - OPNsense:
+            id: OPNsense
+            icon: opnsense.png
+            href: https://opn.{{HOMEPAGE_VAR_DOMAIN}}
+            ping: {{HOMEPAGE_VAR_ROUTER_IP}}
+            description: OPNsense network router
+            widgets:
+              - type: opnsense
+                url: https://{{HOMEPAGE_VAR_ROUTER_IP}}
+                username: {{HOMEPAGE_VAR_OPN_USER}}
+                password: {{HOMEPAGE_VAR_OPN_PASS}}
+                fields: ["cpu", "memory"] # WANIP not working for me
+
+              - type: tailscale
+                deviceid: {{HOMEPAGE_VAR_TAILSCALE_DEV_ID}}
+                key: {{HOMEPAGE_VAR_TAILSCALE_KEY}}
+                fields: ["address"]
+
+        - MySpeed:
+            id: MySpeed
+            icon: myspeed.png
+            href: https://myspeed.{{HOMEPAGE_VAR_DOMAIN}}
+            description: Nginx proxy manager.
+            container: myspeed
+            widget:
+                type: myspeed
+                url: http://myspeed:5216
+
+    - Infra Hardware:
+        - AP-1:
+            id: AP-1
+            icon: openwrt.png
+            href: https://ap1.{{HOMEPAGE_VAR_DOMAIN}}
+            ping: {{HOMEPAGE_VAR_NET_DEV_1}}
+            description: OpenWRT AccessPoint
+
+        - AP-2:
+            id: AP-2
+            icon: mercusys.png
+            href: https://ap2.{{HOMEPAGE_VAR_DOMAIN}}
+            ping: {{HOMEPAGE_VAR_NET_DEV_2}}
+            description: Mercursys AccessPoint
+
+        - SW-1:
+            id: SW-1
+            icon: tp-link.png
+            href: https://sw1.{{HOMEPAGE_VAR_DOMAIN}}
+            ping: {{HOMEPAGE_VAR_NET_DEV_3}}
+            description: TP-Link Switch
+
+        - SW-2:
+            id: SW-2
+            icon: tp-link.png
+            href: https://sw2.{{HOMEPAGE_VAR_DOMAIN}}
+            ping: {{HOMEPAGE_VAR_NET_DEV_4}}
+            description: TP-Link Switch
+
+    - Home Automation:
+        - Homeassistant:
+            id: Homeassistant
+            icon: home-assistant.png
+            href: https://haos.{{HOMEPAGE_VAR_DOMAIN}}
+            description: Homeassinstant container.
+            container: homeassistant
+            widget:
+                type: homeassistant
+                url: https://haos.{{HOMEPAGE_VAR_DOMAIN}}
+                key: {{HOMEPAGE_VAR_HOMEASSISTANT_KEY}}
+
+        - Esphome:
+            id: Esphome
+            icon: esphome.png
+            href: https://esphome.{{HOMEPAGE_VAR_DOMAIN}}
+            description: Esphome container.
+            container: esphome
+            widget:
+                type: esphome
+                url: http://{{HOMEPAGE_VAR_SERVER_IP}}:6052
+                fields: ["total", "online", "offline"]
+                username: {{HOMEPAGE_VAR_ESPHOME_USER}}
+                password: {{HOMEPAGE_VAR_ESPHOME_PASS}}
