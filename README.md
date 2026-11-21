@@ -264,6 +264,20 @@ const configurations = {
 
 The default address configured for retrieving icons is `https://geticon.dev`. This address can be changed in `icon_scraper_api` to use another compatible service. To disable icon loading, set `fetch_domain_icons: false`.
 
+### Fetching icons with a custom icon scraper API
+To simplify icon retrieval, I developed a dedicated **[Icon Scraper API](https://github.com/GERALTdTATUI/Icon_Scraper)**, which runs locally in Docker and provides a centralized way to retrieve website icons. Homepage custom.js can use this API to automatically find and retrieve icons from websites, making the process of managing and displaying service icons easier and more consistent and being able to fetch icons while offline across the dashboard.
+
+The API works by fetching the pages through your nginx proxy hosts list, when a page is fetched the API looks for dafault html icon elements (like <link rel="icon" href="...">) and redirected the client to the icon href target. When no icons were found the API tries some common icon locations (like ${domain}/favicon.svg) and redirect the client to anything it could thing and if no guesses were correct the API relays the requested domain to some external APIs in order to, at least, return some placehoalder.
+
+The custom API can be configured to not use external APIs, drop the request if the host is downs and skip the path guessing, all configured through url params. More can be seem on [my git repo](https://github.com/GERALTdTATUI/Icon_Scraper)
+
+#### Example of the custom API scraped icons:
+| Scraped with geticon.dev api | Scraped with the custom api |
+|---|---|
+| ![External API scraping](docs/images/grid-list-layout-example.png) | ![Custom API scraping](docs/images/grid-list-layout-custom-icon-scraper-example.png) |
+
+The local scraping API was able to fetch some icons that the external API.
+
 ### CSS (`custom.css`)
 
 The CSS:

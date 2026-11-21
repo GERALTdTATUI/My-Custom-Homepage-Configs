@@ -121,7 +121,7 @@ async function process_proxy_block(div_node) {
 
   for (let item of div_node) {
     const name_it = item.querySelector("[data-custom_name_shift=true]") || item.firstChild, nametxt = name_it.innerHTML
-    const icon_lk = configurations.icon_scraper_api !== "" ? configurations.icon_scraper_api + item.href : null
+    const icon_lk = configurations.icon_scraper_api !== "" ? configurations.icon_scraper_api + encodeURIComponent(item.href) : null
     const item_ic = item.querySelector("[data-custom_img_loaded=true]") || document.createElement("img")
     
     // Adding a custom css to structure all of the items
